@@ -6,22 +6,52 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 class MyService :Service()  {
 
+    private var appTimerDisposable: Disposable? = null
+    private val compositeDisposable: CompositeDisposable? = null
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground()
+        if (appTimerDisposable == null) {
+            appTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ aLong ->
+                    Log.e("Mdm", "onStartCommand: " )
+//                    val broadcast = Intent()
+//                    broadcast.putExtra("data",Calendar.getInstance().time)
+//                    sendBroadcast(broadcast, "com.gevorg.mdm_and_app")
+                }) { throwable -> }
+            compositeDisposable?.add(appTimerDisposable!!)
+        }
         return super.onStartCommand(intent, flags, startId)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (appTimerDisposable != null) {
+            appTimerDisposable?.dispose()
+            compositeDisposable!!.delete(appTimerDisposable!!)
+            appTimerDisposable = null
+        }
+    }
 
     private fun startForeground() {
         val channelId =

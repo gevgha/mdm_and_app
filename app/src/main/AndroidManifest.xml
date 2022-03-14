@@ -3,8 +3,14 @@
     package="com.gevorg.mdm_and_app">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission  android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="com.gevorg.mdm" />
+
+    <permission
+        android:name="com.gevorg.mdm_and_app"
+        android:label="app_permission"
+        android:protectionLevel="dangerous" />
 
     <application
         android:name=".App"
@@ -26,8 +32,18 @@
 
         <service
             android:name=".MyService"
-            android:foregroundServiceType="connectedDevice"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <receiver
+            android:name=".MyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="app_permission">
+            <intent-filter>
+                <action android:name="com.gevorg.mdm_and_app" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
